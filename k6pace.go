@@ -18,10 +18,8 @@ func New() *K6pace {
 }
 
 // Method names must begin with a capital letter
-func (c *K6pace) Cmac(ctx context.Context,
-	keyb64 string,
-	ssc int,
-	data string) string {
+func (c *K6pace) Cmac(ctx context.Context, keyb64 string,
+                      ssc int, data string) string {
 
 	key, _ := base64.StdEncoding.DecodeString(keyb64)
 	aesCipher, _ := aes.NewCipher(key)
@@ -32,11 +30,8 @@ func (c *K6pace) Cmac(ctx context.Context,
 	return base64.StdEncoding.EncodeToString(signature)
 }
 
-func (c *K6pace) Encrypt(ctx context.Context,
-	keyb64 string,
-	ssc int,
-	plaintext string) string {
-
+func (c *K6pace) Encrypt(ctx context.Context, keyb64 string,
+                         ssc int, plaintext string) string {
 	blockSize := 16
 	key, _ := base64.StdEncoding.DecodeString(keyb64)
 
@@ -53,11 +48,8 @@ func (c *K6pace) Encrypt(ctx context.Context,
 	return base64.StdEncoding.EncodeToString(encrypted)
 }
 
-func (c *K6pace) Decrypt(ctx context.Context,
-	keyb64 string,
-	ssc int,
-	plaintext string) string {
-
+func (c *K6pace) Decrypt(ctx context.Context, keyb64 string,
+                         ssc int, plaintext string) string {
 	blockSize := 16
 	key, _ := base64.StdEncoding.DecodeString(keyb64)
 	data := []byte(plaintext)
