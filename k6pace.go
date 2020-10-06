@@ -31,7 +31,7 @@ func (c *K6pace) Cmac(ctx context.Context, keyb64 string,
 }
 
 func (c *K6pace) Encrypt(ctx context.Context, keyb64 string,
-                         ssc int, plaintext string) string {
+                         ssc int, plaintext string) []byte {
 	blockSize := 16
 	key, _ := base64.StdEncoding.DecodeString(keyb64)
 
@@ -45,14 +45,13 @@ func (c *K6pace) Encrypt(ctx context.Context, keyb64 string,
 	encrypted := make([]byte, len(padded))
 	aesCbc.CryptBlocks(encrypted, padded)
 
-	return base64.StdEncoding.EncodeToString(encrypted)
+	return encrypted
 }
 
 func (c *K6pace) Decrypt(ctx context.Context, keyb64 string,
-                         ssc int, plaintext string) string {
+                         ssc int, encrypted []byte) []byte {
 	blockSize := 16
 	key, _ := base64.StdEncoding.DecodeString(keyb64)
-	data := []byte(plaintext)
 
 	aesCipher, _ := aes.NewCipher(key)
 	aesEcb := ecb.NewECBEncrypter(aesCipher)
@@ -60,13 +59,13 @@ func (c *K6pace) Decrypt(ctx context.Context, keyb64 string,
 	ssc_bytes := sscBytes(ssc, blockSize)
 	aesEcb.CryptBlocks(iv, ssc_bytes)
 	aesCbc := cipher.NewCBCDecrypter(aesCipher, iv)
-	decrypted := make([]byte, len(data))
-	aesCbc.CryptBlocks(decrypted, data)
+	decrypted := make([]byte, len(encrypted))
+	aesCbc.CryptBlocks(decrypted, encrypted)
 	unpadded, err := padding.UnpadIso7816(decrypted, blockSize)
 	if err != nil {
-		return err.Error()
+		return []byte(err.Error())
 	}
-	return base64.StdEncoding.EncodeToString(unpadded)
+	return unpadded
 }
 
 func sscBytes(ssc int, blockSize int) []byte {
