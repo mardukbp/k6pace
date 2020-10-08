@@ -24,7 +24,7 @@ func (c *K6pace) Cmac(ctx context.Context, keyb64 string,
 	key, _ := base64.StdEncoding.DecodeString(keyb64)
 	aesCipher, _ := aes.NewCipher(key)
 	blockSize := 8
-	ssc_bytes := sscBytes(ssc, blockSize)
+	ssc_bytes := sscBytes(ssc)
 	payload := append(ssc_bytes, []byte(data)...)
 	signature, _ := cmac.Sum(payload, aesCipher, blockSize)
 	return base64.StdEncoding.EncodeToString(signature)
@@ -38,7 +38,7 @@ func (c *K6pace) Encrypt(ctx context.Context, keyb64 string,
 	aesCipher, _ := aes.NewCipher(key)
 	aesEcb := ecb.NewECBEncrypter(aesCipher)
 	iv := make([]byte, blockSize)
-	ssc_bytes := sscBytes(ssc, blockSize)
+	ssc_bytes := sscBytes(ssc)
 	aesEcb.CryptBlocks(iv, ssc_bytes)
 	aesCbc := cipher.NewCBCEncrypter(aesCipher, iv)
 	padded := padding.PadIso7816([]byte(plaintext), blockSize)
@@ -56,7 +56,7 @@ func (c *K6pace) Decrypt(ctx context.Context, keyb64 string,
 	aesCipher, _ := aes.NewCipher(key)
 	aesEcb := ecb.NewECBEncrypter(aesCipher)
 	iv := make([]byte, blockSize)
-	ssc_bytes := sscBytes(ssc, blockSize)
+	ssc_bytes := sscBytes(ssc)
 	aesEcb.CryptBlocks(iv, ssc_bytes)
 	aesCbc := cipher.NewCBCDecrypter(aesCipher, iv)
 	decrypted := make([]byte, len(encrypted))
@@ -68,8 +68,8 @@ func (c *K6pace) Decrypt(ctx context.Context, keyb64 string,
 	return unpadded
 }
 
-func sscBytes(ssc int, blockSize int) []byte {
-	bytearr := make([]byte, blockSize)
-	binary.BigEndian.PutUint64(bytearr, uint64(ssc))
+func sscBytes(ssc int) []byte {
+	bytearr := make([]byte, 16)
+	binary.BigEndian.PutUint64(bytearr[8:], uint64(ssc))
 	return bytearr
 }
