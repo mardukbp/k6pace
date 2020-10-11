@@ -16,13 +16,18 @@ import (
 
 type K6pace struct{}
 
+type Response struct {
+	status int
+	body []byte
+}
+
 func New() *K6pace {
 	return &K6pace{}
 }
 
 func (c *K6pace) Post(ctx context.Context, url string, 
                       headers map[string]string, cookie string,
-                      body []byte, insecure bool) (int, []byte) {
+                      body []byte, insecure bool) Response {
 	
 	tlsConfig := &tls.Config {
 		InsecureSkipVerify: insecure,
@@ -33,7 +38,7 @@ func (c *K6pace) Post(ctx context.Context, url string,
 
 func request(method string, url string, headers map[string]string,
              cookie string, body []byte, 
-             tlsConfig *tls.Config) (int, []byte) {
+             tlsConfig *tls.Config) Response {
 
         req := fasthttp.AcquireRequest()
         defer fasthttp.ReleaseRequest(req)
@@ -44,7 +49,7 @@ func request(method string, url string, headers map[string]string,
 
 		prepareRequest(req, method, url, headers, cookie, body)
         client.Do(req, resp)
-        return resp.StatusCode(), resp.Body()
+        return Response{ resp.StatusCode(), resp.Body() }
 }
 
 func prepareRequest(req *fasthttp.Request, method string, url string,
