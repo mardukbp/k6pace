@@ -12,26 +12,29 @@ import (
 	"github.com/mardukbp/padding"
     "github.com/valyala/fasthttp"
     "strings"
+    "strconv"
     "fmt"
+    "log"
 )
 
 type K6pace struct{}
-
-type Response struct {
-	status int
-	body []byte
-}
 
 func New() *K6pace {
 	return &K6pace{}
 }
 
+func (c *K6pace) B64decode(ctx context.Context, input string) []byte {
+	byte_arr, err := base64.StdEncoding.DecodeString(input)
+
+	if err !=nil {
+		log.Panic(err)
+	}
+	return byte_arr
+}
+
 func (c *K6pace) Post(ctx context.Context, url string, 
                       headers map[string]string, cookie string,
-                      body []byte, insecure bool) Response {
-
-	fmt.Println(url)
-	fmt.Println(headers)
+                      body []byte, insecure bool) string {
 	
 	tlsConfig := &tls.Config {
 		InsecureSkipVerify: insecure,
@@ -42,18 +45,23 @@ func (c *K6pace) Post(ctx context.Context, url string,
 
 func request(method string, url string, headers map[string]string,
              cookie string, body []byte, 
-             tlsConfig *tls.Config) Response {
+             tlsConfig *tls.Config) string {
 
-        req := fasthttp.AcquireRequest()
-        defer fasthttp.ReleaseRequest(req)
-        resp := fasthttp.AcquireResponse()
-        defer fasthttp.ReleaseResponse(resp)
+	req := fasthttp.AcquireRequest()
+	defer fasthttp.ReleaseRequest(req)
+	resp := fasthttp.AcquireResponse()
+	defer fasthttp.ReleaseResponse(resp)
 
-        client := &fasthttp.Client{ TLSConfig: tlsConfig }
+	client := &fasthttp.Client{ TLSConfig: tlsConfig }
 
-		prepareRequest(req, method, url, headers, cookie, body)
-        client.Do(req, resp)
-        return Response{ resp.StatusCode(), resp.Body() }
+	prepareRequest(req, method, url, headers, cookie, body)
+	client.Do(req, resp)
+
+    body_base64 := base64.StdEncoding.EncodeToString(resp.Body())
+    status_string := strconv.Itoa(resp.StatusCode())
+	res := fmt.Sprintf("{\"status\":\"%s\", \"body\":\"%s\"}", 
+					   status_string, body_base64)
+	return res
 }
 
 func prepareRequest(req *fasthttp.Request, method string, url string,
