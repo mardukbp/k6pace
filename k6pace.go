@@ -12,6 +12,7 @@ import (
 	"github.com/mardukbp/padding"
     "github.com/valyala/fasthttp"
     "strings"
+    "fmt"
 )
 
 type K6pace struct{}
@@ -28,6 +29,9 @@ func New() *K6pace {
 func (c *K6pace) Post(ctx context.Context, url string, 
                       headers map[string]string, cookie string,
                       body []byte, insecure bool) Response {
+
+	fmt.Println(url)
+	fmt.Println(headers)
 	
 	tlsConfig := &tls.Config {
 		InsecureSkipVerify: insecure,
