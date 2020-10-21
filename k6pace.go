@@ -111,7 +111,7 @@ func (c *K6pace) Encrypt(ctx context.Context, keyb64 string,
 }
 
 func (c *K6pace) Decrypt(ctx context.Context, keyb64 string, 
-                         ssc int, encrypted []byte) []byte {
+                         ssc int, encrypted []byte) string {
 
 	padding.VerifyPadding(encrypted, aes.BlockSize)	
 	key, _ := base64.StdEncoding.DecodeString(keyb64)
@@ -122,9 +122,9 @@ func (c *K6pace) Decrypt(ctx context.Context, keyb64 string,
 	aesCbc.CryptBlocks(decrypted, encrypted)
 	unpadded, err := padding.UnpadIso7816(decrypted, aes.BlockSize)
 	if err != nil {
-		return []byte(err.Error())
+		return err.Error()
 	}
-	return unpadded
+	return string(unpadded)
 }
 
 func cbcIV (aesCipher cipher.Block, ssc int) []byte {
