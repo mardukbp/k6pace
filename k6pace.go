@@ -44,17 +44,15 @@ func (c *K6pace) Post(ctx context.Context, url string,
 }
 
 func request(method string, url string, headers map[string]string,
-             cookie string, body []byte, 
-             tlsConfig *tls.Config) string {
+             cookie string, body []byte, tlsConfig *tls.Config) string {
 
 	req := fasthttp.AcquireRequest()
 	defer fasthttp.ReleaseRequest(req)
 	resp := fasthttp.AcquireResponse()
 	defer fasthttp.ReleaseResponse(resp)
 
-	client := &fasthttp.Client{ TLSConfig: tlsConfig }
-
 	prepareRequest(req, method, url, headers, cookie, body)
+	client := &fasthttp.Client{ TLSConfig: tlsConfig }
 	client.Do(req, resp)
 
     body_base64 := base64.StdEncoding.EncodeToString(resp.Body())
@@ -65,8 +63,7 @@ func request(method string, url string, headers map[string]string,
 }
 
 func prepareRequest(req *fasthttp.Request, method string, url string,
-                    headers map[string]string, cookie string,
-                    body []byte) {
+                    headers map[string]string, cookie string, body []byte) {
 	
 	req.SetRequestURI(url)
 	req.Header.DisableNormalizing()
