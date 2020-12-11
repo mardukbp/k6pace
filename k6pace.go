@@ -4,17 +4,17 @@ import (
 	"context"
 	"crypto/aes"
 	"crypto/cipher"
-    "crypto/tls"
+	"crypto/tls"
 	"encoding/base64"
 	"encoding/binary"
 	"github.com/aead/cmac"
 	"github.com/andreburgaud/crypt2go/ecb"
 	"github.com/mardukbp/padding"
-    "github.com/valyala/fasthttp"
-    "strings"
-    "strconv"
-    "fmt"
-    "log"
+	"github.com/valyala/fasthttp"
+	"strings"
+	"strconv"
+	"fmt"
+	"log"
 )
 
 type K6pace struct{}
@@ -32,19 +32,19 @@ func (c *K6pace) B64decode(ctx context.Context, input string) []byte {
 	return byte_arr
 }
 
-func (c *K6pace) Post(ctx context.Context, url string, 
-                      headers map[string]string, cookie string,
-                      body []byte, insecure bool) string {
-	
+func (c *K6pace) Post(ctx context.Context, url string,
+					  headers map[string]string, cookie string,
+					  body []byte, insecure bool) string {
+
 	tlsConfig := &tls.Config {
 		InsecureSkipVerify: insecure,
 	}
-	
+
 	return request("POST", url, headers, cookie, body, tlsConfig)
 }
 
 func request(method string, url string, headers map[string]string,
-             cookie string, body []byte, tlsConfig *tls.Config) string {
+			 cookie string, body []byte, tlsConfig *tls.Config) string {
 
 	req := fasthttp.AcquireRequest()
 	defer fasthttp.ReleaseRequest(req)
@@ -55,16 +55,16 @@ func request(method string, url string, headers map[string]string,
 	client := &fasthttp.Client{ TLSConfig: tlsConfig }
 	client.Do(req, resp)
 
-    body_base64 := base64.StdEncoding.EncodeToString(resp.Body())
-    status_string := strconv.Itoa(resp.StatusCode())
-	res := fmt.Sprintf("{\"status\":\"%s\", \"body\":\"%s\"}", 
+	body_base64 := base64.StdEncoding.EncodeToString(resp.Body())
+	status_string := strconv.Itoa(resp.StatusCode())
+	res := fmt.Sprintf("{\"status\":\"%s\", \"body\":\"%s\"}",
 					   status_string, body_base64)
 	return res
 }
 
 func prepareRequest(req *fasthttp.Request, method string, url string,
-                    headers map[string]string, cookie string, body []byte) {
-	
+					headers map[string]string, cookie string, body []byte) {
+
 	req.SetRequestURI(url)
 	req.Header.DisableNormalizing()
 	req.Header.SetContentType("application/json")
@@ -80,12 +80,12 @@ func prepareRequest(req *fasthttp.Request, method string, url string,
 }
 
 func parseCookie(cookie string) (string, string) {
-	name_value := strings.Split(cookie, "=")	
+	name_value := strings.Split(cookie, "=")
 	return name_value[0], name_value[1]
 }
 
-func (c *K6pace) Sign(ctx context.Context, keyb64 string, 
-                      ssc int, data []byte) string {
+func (c *K6pace) Sign(ctx context.Context, keyb64 string,
+					  ssc int, data []byte) string {
 
 	key, _ := base64.StdEncoding.DecodeString(keyb64)
 	aesCipher, _ := aes.NewCipher(key)
@@ -96,9 +96,9 @@ func (c *K6pace) Sign(ctx context.Context, keyb64 string,
 	return base64.StdEncoding.EncodeToString(signature)
 }
 
-func (c *K6pace) Encrypt(ctx context.Context, keyb64 string, 
-                         ssc int, plaintext string) []byte {
-	
+func (c *K6pace) Encrypt(ctx context.Context, keyb64 string,
+						 ssc int, plaintext string) []byte {
+
 	key, _ := base64.StdEncoding.DecodeString(keyb64)
 	aesCipher, _ := aes.NewCipher(key)
 	iv := cbcIV(aesCipher, ssc)
@@ -110,10 +110,10 @@ func (c *K6pace) Encrypt(ctx context.Context, keyb64 string,
 	return encrypted
 }
 
-func (c *K6pace) Decrypt(ctx context.Context, keyb64 string, 
-                         ssc int, encrypted []byte) string {
+func (c *K6pace) Decrypt(ctx context.Context, keyb64 string,
+						 ssc int, encrypted []byte) string {
 
-	padding.VerifyPadding(encrypted, aes.BlockSize)	
+	padding.VerifyPadding(encrypted, aes.BlockSize)
 	key, _ := base64.StdEncoding.DecodeString(keyb64)
 	aesCipher, _ := aes.NewCipher(key)
 	iv := cbcIV(aesCipher, ssc)
@@ -137,7 +137,7 @@ func cbcIV (aesCipher cipher.Block, ssc int) []byte {
 }
 
 func sscBytes(ssc int) []byte {
-    bytearr := make([]byte, aes.BlockSize)
+	bytearr := make([]byte, aes.BlockSize)
 	binary.BigEndian.PutUint64(bytearr[8:], uint64(ssc))
 	return bytearr
 }
