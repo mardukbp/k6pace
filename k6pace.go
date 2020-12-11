@@ -24,7 +24,7 @@ func New() *K6pace {
 }
 
 func (c *K6pace) B64decode(ctx context.Context, input string) []byte {
-	byte_arr, err := base64.StdEncoding.DecodeString(input)
+                           byte_arr, err := base64.StdEncoding.DecodeString(input)
 
 	if err !=nil {
 		log.Panic(err)
@@ -33,8 +33,8 @@ func (c *K6pace) B64decode(ctx context.Context, input string) []byte {
 }
 
 func (c *K6pace) Post(ctx context.Context, url string,
-					  headers map[string]string, cookie string,
-					  body []byte, insecure bool) string {
+                      headers map[string]string, cookie string,
+                      body []byte, insecure bool) string {
 
 	tlsConfig := &tls.Config {
 		InsecureSkipVerify: insecure,
@@ -44,7 +44,7 @@ func (c *K6pace) Post(ctx context.Context, url string,
 }
 
 func request(method string, url string, headers map[string]string,
-			 cookie string, body []byte, tlsConfig *tls.Config) string {
+             cookie string, body []byte, tlsConfig *tls.Config) string {
 
 	req := fasthttp.AcquireRequest()
 	defer fasthttp.ReleaseRequest(req)
@@ -63,7 +63,7 @@ func request(method string, url string, headers map[string]string,
 }
 
 func prepareRequest(req *fasthttp.Request, method string, url string,
-					headers map[string]string, cookie string, body []byte) {
+                    headers map[string]string, cookie string, body []byte) {
 
 	req.SetRequestURI(url)
 	req.Header.DisableNormalizing()
@@ -85,7 +85,7 @@ func parseCookie(cookie string) (string, string) {
 }
 
 func (c *K6pace) Sign(ctx context.Context, keyb64 string,
-					  ssc int, data []byte) string {
+                      ssc int, data []byte) string {
 
 	key, _ := base64.StdEncoding.DecodeString(keyb64)
 	aesCipher, _ := aes.NewCipher(key)
@@ -97,7 +97,7 @@ func (c *K6pace) Sign(ctx context.Context, keyb64 string,
 }
 
 func (c *K6pace) Encrypt(ctx context.Context, keyb64 string,
-						 ssc int, plaintext string) []byte {
+                         ssc int, plaintext string) []byte {
 
 	key, _ := base64.StdEncoding.DecodeString(keyb64)
 	aesCipher, _ := aes.NewCipher(key)
@@ -111,7 +111,7 @@ func (c *K6pace) Encrypt(ctx context.Context, keyb64 string,
 }
 
 func (c *K6pace) Decrypt(ctx context.Context, keyb64 string,
-						 ssc int, encrypted []byte) string {
+                         ssc int, encrypted []byte) string {
 
 	padding.VerifyPadding(encrypted, aes.BlockSize)
 	key, _ := base64.StdEncoding.DecodeString(keyb64)
